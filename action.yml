@@ -14,8 +14,10 @@ runs:
     
     - name: Install AutoCodeRover
       run: |
+        echo "::group::Installing AutoCodeRover..."
         python -m pip install --upgrade pip
         pip install auto-code-rover
+        echo "::endgroup::"
       shell: bash
 
     - name: Run AutoCodeRover
@@ -23,5 +25,11 @@ runs:
       shell: bash
 
     - name: List repair results
-      run: ls -R repair_results/
+      run: |
+        if [ -d "repair_results" ]; then
+          echo "::notice::Repair results found!"
+          ls -R repair_results/
+        else
+          echo "::warning::No repair_results directory found. AutoCodeRover might have failed to generate a fix."
+        fi
       shell: bash
