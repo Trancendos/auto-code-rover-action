@@ -8,9 +8,12 @@ runs:
   using: "composite"
   steps:
     - name: Set up Python
-      uses: actions/setup-python@v2
+      # Optimization: Upgrade to setup-python@v5 (Node 20 runtime) for better performance and security
+      uses: actions/setup-python@v5
       with:
-        python-version: '3.8'
+        # Optimization: Upgrade to Python 3.12 for significant runtime performance improvements
+        # Note: Validated against upstream environment.yml which specifies python=3.12.5
+        python-version: '3.12'
     
     - name: Install AutoCodeRover
       run: |
