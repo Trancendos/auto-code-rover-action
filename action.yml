@@ -8,7 +8,7 @@ runs:
   using: "composite"
   steps:
     - name: Set up Python
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v5
       with:
         python-version: '3.8'
     
@@ -19,7 +19,10 @@ runs:
       shell: bash
 
     - name: Run AutoCodeRover
-      run: auto-code-rover repair --bug-id ${{ inputs.bug_id }}
+      env:
+        BUG_ID: ${{ inputs.bug_id }}
+      # Security: Use environment variable to prevent command injection
+      run: auto-code-rover repair --bug-id "$BUG_ID"
       shell: bash
 
     - name: List repair results
