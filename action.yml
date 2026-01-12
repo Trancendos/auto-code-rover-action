@@ -4,6 +4,9 @@ inputs:
   bug_id:
     description: 'Bug ID to repair'
     required: true
+  openai_key:
+    description: 'OpenAI API Key for LLM access'
+    required: true
 runs:
   using: "composite"
   steps:
@@ -15,13 +18,21 @@ runs:
     - name: Install AutoCodeRover
       run: |
         python -m pip install --upgrade pip
-        pip install auto-code-rover
+        # UX Improvement: Check if package exists or fail with helpful message
+        pip install auto-code-rover || { echo "::error::❌ Failed to install 'auto-code-rover'. The package might not be available on PyPI. Please check the repository documentation."; exit 1; }
       shell: bash
 
     - name: Run AutoCodeRover
       run: auto-code-rover repair --bug-id ${{ inputs.bug_id }}
+      env:
+        OPENAI_KEY: ${{ inputs.openai_key }}
       shell: bash
 
     - name: List repair results
-      run: ls -R repair_results/
+      run: |
+        if [ -d "repair_results" ]; then
+          ls -R repair_results/
+        else
+          echo "::warning::⚠️ No repair results found."
+        fi
       shell: bash
