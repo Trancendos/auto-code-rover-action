@@ -8,6 +8,10 @@ This GitHub Action runs [AutoCodeRover](https://github.com/nus-apr/auto-code-rov
 
 **Required** The ID of the bug to repair.
 
+### `openai_key`
+
+**Required** Your OpenAI API Key.
+
 ## Example usage
 
 ```yaml
@@ -30,6 +34,7 @@ jobs:
       uses: seekayel/auto-code-rover-action@v1
       with:
         bug_id: ${{ github.event.inputs.bug_id }}
+        openai_key: ${{ secrets.OPENAI_KEY }}
 ```
 
 ## How it works
@@ -37,9 +42,10 @@ jobs:
 This action:
 
 1. Sets up Python 3.8
-2. Installs AutoCodeRover
-3. Runs AutoCodeRover with the specified bug ID
-4. Lists the repair results
+2. Validates inputs
+3. Installs AutoCodeRover
+4. Runs AutoCodeRover with the specified bug ID
+5. Lists the repair results
 
 ## Outputs
 
