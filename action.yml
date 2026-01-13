@@ -8,9 +8,22 @@ runs:
   using: "composite"
   steps:
     - name: Set up Python
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v5
       with:
         python-version: '3.8'
+
+    # Optimization: Cache pip dependencies to speed up installation.
+    # We use a dynamic key (github.run_id) to ensure the cache is updated on every run
+    # if new dependencies are downloaded. restore-keys allows reusing the most recent cache.
+    # We use actions/cache manually because setup-python's built-in cache requires a
+    # dependency file in the caller's repository, which might not exist.
+    - name: Cache pip
+      uses: actions/cache@v4
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ github.run_id }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
     
     - name: Install AutoCodeRover
       run: |
