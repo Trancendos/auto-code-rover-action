@@ -14,14 +14,30 @@ runs:
     
     - name: Install AutoCodeRover
       run: |
+        echo "::group::📦 Installing AutoCodeRover Dependencies..."
         python -m pip install --upgrade pip
         pip install auto-code-rover
+        echo "::endgroup::"
+        echo "✅ Dependencies installed."
       shell: bash
 
     - name: Run AutoCodeRover
-      run: auto-code-rover repair --bug-id ${{ inputs.bug_id }}
+      run: |
+        echo "🚀 Starting AutoCodeRover repair for Bug ID: ${{ inputs.bug_id }}"
+        auto-code-rover repair --bug-id ${{ inputs.bug_id }}
       shell: bash
 
     - name: List repair results
-      run: ls -R repair_results/
+      run: |
+        echo "### 🛠️ Repair Results" >> $GITHUB_STEP_SUMMARY
+        if [ -d "repair_results" ]; then
+          echo "The following results were generated:" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          ls -R repair_results/ >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          echo "✅ Repair results found."
+        else
+          echo "⚠️ No results directory found." >> $GITHUB_STEP_SUMMARY
+          echo "⚠️ No results directory found."
+        fi
       shell: bash
