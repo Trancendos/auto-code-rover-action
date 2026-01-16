@@ -14,14 +14,31 @@ runs:
     
     - name: Install AutoCodeRover
       run: |
+        echo "::group::Installing AutoCodeRover..."
         python -m pip install --upgrade pip
         pip install auto-code-rover
+        echo "::endgroup::"
       shell: bash
 
     - name: Run AutoCodeRover
-      run: auto-code-rover repair --bug-id ${{ inputs.bug_id }}
+      env:
+        BUG_ID: ${{ inputs.bug_id }}
+      run: auto-code-rover repair --bug-id "$BUG_ID"
       shell: bash
 
-    - name: List repair results
-      run: ls -R repair_results/
+    - name: Summarize Repair Results
+      if: always()
+      run: |
+        if [ -d "repair_results" ]; then
+          echo "## 🛠️ AutoCodeRover Repair Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Repair attempts completed. Below are the generated artifacts:" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          ls -R repair_results/ >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+        else
+          echo "## ⚠️ No Results Found" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "The repair process did not generate a 'repair_results' directory." >> $GITHUB_STEP_SUMMARY
+        fi
       shell: bash
