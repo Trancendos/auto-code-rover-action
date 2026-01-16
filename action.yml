@@ -7,8 +7,18 @@ inputs:
 runs:
   using: "composite"
   steps:
+    - name: Cache Pip
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.cache/pip
+          ~/Library/Caches/pip
+        key: pip-${{ runner.os }}-${{ github.run_id }}
+        restore-keys: |
+          pip-${{ runner.os }}-
+
     - name: Set up Python
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v5
       with:
         python-version: '3.8'
     
