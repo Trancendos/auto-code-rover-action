@@ -19,7 +19,9 @@ runs:
       shell: bash
 
     - name: Run AutoCodeRover
-      run: auto-code-rover repair --bug-id ${{ inputs.bug_id }}
+      env:
+        BUG_ID: ${{ inputs.bug_id }}
+      run: auto-code-rover repair --bug-id "$BUG_ID"
       shell: bash
 
     - name: List repair results
