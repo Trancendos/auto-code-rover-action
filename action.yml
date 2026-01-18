@@ -14,8 +14,10 @@ runs:
     
     - name: Install AutoCodeRover
       run: |
+        echo "::group::Install AutoCodeRover"
         python -m pip install --upgrade pip
         pip install auto-code-rover
+        echo "::endgroup::"
       shell: bash
 
     - name: Run AutoCodeRover
@@ -23,5 +25,20 @@ runs:
       shell: bash
 
     - name: List repair results
-      run: ls -R repair_results/
+      run: |
+        if [ -d "repair_results" ]; then
+           ls -R repair_results/
+           {
+             echo "## 🛠️ Repair Results"
+             echo ""
+             echo "The following results were generated:"
+             echo '```'
+             ls -R repair_results/
+             echo '```'
+           } >> "$GITHUB_STEP_SUMMARY"
+        else
+           echo "::error::repair_results directory not found"
+           echo "⚠️ No results directory found." >> "$GITHUB_STEP_SUMMARY"
+           exit 1
+        fi
       shell: bash
