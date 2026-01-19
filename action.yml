@@ -23,7 +23,9 @@ runs:
     - name: Run AutoCodeRover
       env:
         BUG_ID: ${{ inputs.bug_id }}
-      run: auto-code-rover repair --bug-id "$BUG_ID"
+      run: |
+        echo "🚀 Starting AutoCodeRover for Bug ID: $BUG_ID"
+        auto-code-rover repair --bug-id "$BUG_ID"
       shell: bash
 
     - name: List repair results
@@ -33,7 +35,24 @@ runs:
            {
              echo "## 🛠️ Repair Results"
              echo ""
-             echo "The following results were generated:"
+
+             patches=$(find repair_results -name "*.patch" -o -name "*.diff")
+             if [ -n "$patches" ]; then
+                echo "### ✨ Generated Patches"
+                for patch in $patches; do
+                  echo "<details>"
+                  echo "<summary>Preview: $(basename "$patch")</summary>"
+                  echo ""
+                  echo "\`\`\`diff"
+                  cat "$patch"
+                  echo "\`\`\`"
+                  echo ""
+                  echo "</details>"
+                  echo ""
+                done
+             fi
+
+             echo "### 📂 Output Files"
              echo '```'
              ls -R repair_results/
              echo '```'
