@@ -2,26 +2,59 @@ name: 'AutoCodeRover Action'
 description: 'Run AutoCodeRover for automatic program repair'
 inputs:
   bug_id:
-    description: 'Bug ID to repair'
+    description: 'Bug ID (SWE-bench task ID) to repair'
     required: true
+  acr_repository:
+    description: 'Repository to clone AutoCodeRover from'
+    required: false
+    default: 'AutoCodeRoverSG/auto-code-rover'
+  acr_ref:
+    description: 'Ref (branch/commit) to checkout'
+    required: false
+    default: 'main'
 runs:
   using: "composite"
   steps:
-    - name: Set up Python
-      uses: actions/setup-python@v2
+    - name: Checkout AutoCodeRover Source
+      uses: actions/checkout@v4
       with:
-        python-version: '3.8'
-    
-    - name: Install AutoCodeRover
+        repository: ${{ inputs.acr_repository }}
+        ref: ${{ inputs.acr_ref }}
+        path: .acr
+        fetch-depth: 1
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+        cache: 'pip'
+        cache-dependency-path: .acr/requirements.txt
+
+    - name: Install AutoCodeRover Dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install auto-code-rover
+        pip install -r .acr/requirements.txt
       shell: bash
 
     - name: Run AutoCodeRover
-      run: auto-code-rover repair --bug-id ${{ inputs.bug_id }}
+      run: |
+        echo "Running AutoCodeRover on task: ${{ inputs.bug_id }}"
+        export PYTHONPATH=$PYTHONPATH:$(pwd)/.acr
+
+        # Attempt to run in SWE-bench mode as suggested by bug_id convention
+        # Note: This requires OPENAI_KEY or similar to be present in the environment
+        if [ -z "$OPENAI_KEY" ] && [ -z "$ANTHROPIC_API_KEY" ]; then
+          echo "WARNING: No API keys found in environment. AutoCodeRover requires an LLM API key."
+        fi
+
+        python .acr/app/main.py swe-bench --task ${{ inputs.bug_id }} --output-dir repair_results || {
+          echo "::error::AutoCodeRover run failed. Please check inputs and API keys."
+          echo "Usage help:"
+          python .acr/app/main.py --help
+          exit 1
+        }
       shell: bash
 
     - name: List repair results
-      run: ls -R repair_results/
+      run: ls -R repair_results/ || echo "No results found"
       shell: bash
