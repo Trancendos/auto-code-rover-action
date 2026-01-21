@@ -1,0 +1,3 @@
+## 2024-10-26 - Caching in Composite Actions
+**Learning:** `actions/setup-python` built-in caching relies on dependency files in the caller's repository. For tools installed *within* a composite action (like `pip install some-tool`), manual `actions/cache` is required to cache the tool's installation artifacts (wheels) effectively, as the caller's repo won't have the relevant requirements file.
+**Action:** Use `actions/cache` with `pip cache dir` and a `run_id` based key strategy (`key: ${{ runner.os }}-pip-${{ github.run_id }}`) when installing tools in composite actions to ensure fresh installs while caching downloads.
