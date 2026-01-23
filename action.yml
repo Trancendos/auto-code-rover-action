@@ -23,7 +23,7 @@ runs:
     - name: Run AutoCodeRover
       env:
         BUG_ID: ${{ inputs.bug_id }}
-      run: auto-code-rover repair --bug-id "$BUG_ID"
+      run: auto-code-rover repair --bug-id="$BUG_ID"
       shell: bash
 
     - name: List repair results
@@ -38,6 +38,19 @@ runs:
              ls -R repair_results/
              echo '```'
            } >> "$GITHUB_STEP_SUMMARY"
+
+           find repair_results -name "*.patch" -o -name "*.diff" | while read -r patch_file; do
+             {
+                echo "<details>"
+                echo "<summary>Preview: $(basename "$patch_file")</summary>"
+                echo ""
+                echo "\`\`\`diff"
+                cat "$patch_file"
+                echo "\`\`\`"
+                echo ""
+                echo "</details>"
+             } >> "$GITHUB_STEP_SUMMARY"
+           done
         else
            echo "::error::repair_results directory not found"
            echo "⚠️ No results directory found." >> "$GITHUB_STEP_SUMMARY"
